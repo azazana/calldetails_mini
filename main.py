@@ -50,14 +50,14 @@ def get_max_timestamp_from_postgresql(pg_connection, logger):
         pg_cursor.execute("""
             SELECT EXISTS (
                 SELECT FROM information_schema.tables 
-                WHERE table_name = 'calldetails_mini'
+                WHERE table_name = 'calldetails_mini_3'
             )
         """)
         table_exists = pg_cursor.fetchone()[0]
         
         if table_exists:
             # Получаем максимальное значение dateTimeOrigination из PostgreSQL
-            pg_cursor.execute("SELECT MAX(\"dateTimeOrigination\") FROM calldetails_mini")
+            pg_cursor.execute("SELECT MAX(\"dateTimeOrigination\") FROM calldetails_mini_3")
             max_timestamp_result = pg_cursor.fetchone()[0]
             return max_timestamp_result
         else:
@@ -113,21 +113,21 @@ def log_data_statistics(data, column_names, date_column, logger):
 
 def create_postgresql_table_if_not_exists(pg_cursor, column_names, logger):
     """
-    Создает таблицу calldetails_mini в PostgreSQL, если она не существует.
+    Создает таблицу calldetails_mini_3 в PostgreSQL, если она не существует.
     """
     create_table_query = f"""
-        CREATE TABLE IF NOT EXISTS calldetails_mini (
+        CREATE TABLE IF NOT EXISTS calldetails_mini_3 (
             {', '.join([f'"{col}" TEXT' for col in column_names])}
         )
     """
     pg_cursor.execute(create_table_query)
-    logger.info(f"Таблица calldetails_mini создана/проверена с {len(column_names)} колонками")
+    logger.info(f"Таблица calldetails_mini_3 создана/проверена с {len(column_names)} колонками")
 
 
 def main():
     """
     Основная функция для переноса данных из MySQL в PostgreSQL.
-    Получает максимальную дату из PostgreSQL таблицы calldetails_mini и собирает
+    Получает максимальную дату из PostgreSQL таблицы calldetails_mini_3 и собирает
     только новые данные из MySQL таблицы ciscocdr.calldetails_mini после этой даты
     по колонке dateTimeOrigination (Unix timestamp). Если таблица пустая или не существует,
     берет данные с 01.01.2025.
@@ -217,7 +217,7 @@ def main():
             
             # Вставляем новые данные
             insert_query = f"""
-                INSERT INTO calldetails_mini ({', '.join([f'"{col}"' for col in column_names])})
+                INSERT INTO calldetails_mini_3 ({', '.join([f'"{col}"' for col in column_names])})
                 VALUES ({', '.join(['%s'] * len(column_names))})
             """
             
